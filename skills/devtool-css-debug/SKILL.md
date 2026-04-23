@@ -1,5 +1,9 @@
 ---
 name: devtool-css-debug
+compatibility:
+  tools:
+    - user-chrome-devtools
+    - ask-question
 description: Syncs DevTools CSS edits to local source files via injected page script. Triggers on write-back, CSS-to-source sync, style integration, DevTools edits, and CSS debugging.
 ---
 

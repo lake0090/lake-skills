@@ -3,6 +3,7 @@ name: figma-to-code
 compatibility:
   tools:
     - framelink-figma-mcp
+    - cursor-ide-browser
 description: >-
   将 Figma 设计稿转换为生产级代码（Vue / React / HTML / CSS）。
   只要消息中出现 figma.com/design/ 或 figma.com/file/ 格式的链接，

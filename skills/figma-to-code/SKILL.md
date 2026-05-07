@@ -2,13 +2,11 @@
 name: figma-to-code
 compatibility:
   tools:
-    - user-Framelink_Figma_MCP
-    - cursor-ide-browser
+    - Framelink_Figma_MCP
 description: >-
   将 Figma 设计稿转换为生产级代码（Vue / React / HTML / CSS）。
   只要消息中出现 figma.com/design/ 或 figma.com/file/ 格式的链接，
-  无论用户是否明确说"Figma to code"，都必须立即使用本 skill——
-  包括"帮我实现这个"、"照这个写组件"、"按这个设计做"、"把这个变成代码"
+  ，都立即使用本 skil, 包括"帮我实现这个"、"照这个写组件"、"按这个设计做"、"把这个变成代码"
   等隐式表达，或任何附带 Figma 链接的组件/页面实现请求。
   未调用 get_figma_data 成功之前，禁止开始写任何界面代码。
 ---
@@ -74,15 +72,16 @@ Preview     : ok | skipped (<原因>)
 
 ## Step 6：预览（有 UI 改动时执行）
 
-优先使用 `cursor-ide-browser`：
+**优先使用 Cursor Browser Tab（`cursor-ide-browser`）**，并按以下顺序执行：
 
-1. 读 `package.json` 或框架配置确认端口；未声明时依次探测 3000 → 5173 → 8080
-2. 根据项目类型（Next.js / Nuxt / Vue / Vite 等）追溯组件对应的页面路由，
-   结合 `base` 配置和 hash/history 模式拼出完整预览 URL；
-   若路由关系不明确，**询问用户而不是猜测**
-3. `browser_navigate` 打开 URL，截图确认渲染正确
+1. 先用 `browser_tabs` 检查并复用现有 tab；需要时新建 tab 再导航。
+2. 读 `package.json` 或框架配置确认端口；未声明时按 3000 → 5173 → 8080 依次探测。
+3. 根据项目类型（Next.js / Nuxt / Vue / Vite 等）追溯组件对应页面路由，结合 `base` 与 hash/history 模式拼出完整 URL。
+4. 路由映射不明确时，**先询问用户，不得猜测 URL**。
+5. 使用 `browser_navigate` 打开目标 URL；导航后必须执行 `browser_snapshot`，并至少一次 `browser_take_screenshot` 做可视化确认。
+6. 若页面未加载完成，采用短等待重试（1-3 秒 + snapshot 检查），避免长时间盲等。
 
-`cursor-ide-browser` 不可用时，降级调用 skill `devtool-css-debug`
-（该 skill 的完整规则同样适用；`targetUrl` 必须明确，不得猜测）。
+`cursor-ide-browser` 不可用时，降级调用 skill `devtool-css-debug`（`targetUrl` 必须明确，不得猜测）。
 
-两种方式均失败时跳过，摘要写 `Preview: skipped (<原因>)`。
+两种方式均失败时，跳过预览，并在摘要写 `Preview: skipped (<原因>)`。
+`

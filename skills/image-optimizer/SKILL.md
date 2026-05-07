@@ -38,6 +38,9 @@ Real repo: **analyze first, run second** — read config, output the full `scan-
      --project-root <root> --public-dir public --public-dir static \
      --alias "@=src" --alias "~=." <path>
    ```
+   ```powershell
+   npx --yes lake-cimg@latest scan-code --issues-only --limit 100 --project-root <root> --public-dir public --public-dir static --alias "@=src" --alias "~=." "<path>"
+   ```
    PowerShell: use `;` not `&&`. Re-scan with the same flags; only add a flag when you find a genuinely missed config key.
 
 4. **Read** the JSON: `referencePoints` (or `items.length`), per-item `issues[]` / `hints[]`, and the `summary` line (string in current `lake-cimg@latest`, not an object). **`referencePoints = 0` (or `items` empty) → not a pass** — no `<img>` refs in scope, wrong root, or wrong extensions. [Summarize](reference.md#reporting); do not paste full JSON.

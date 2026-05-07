@@ -2,7 +2,7 @@
 name: figma-to-code
 compatibility:
   tools:
-    - framelink-figma-mcp
+    - user-Framelink_Figma_MCP
     - cursor-ide-browser
 description: >-
   将 Figma 设计稿转换为生产级代码（Vue / React / HTML / CSS）。
@@ -82,7 +82,7 @@ Preview     : ok | skipped (<原因>)
    若路由关系不明确，**询问用户而不是猜测**
 3. `browser_navigate` 打开 URL，截图确认渲染正确
 
-`cursor-ide-browser` 不可用时，降级调用 skill `css-devtools-debug`
+`cursor-ide-browser` 不可用时，降级调用 skill `devtool-css-debug`
 （该 skill 的完整规则同样适用；`targetUrl` 必须明确，不得猜测）。
 
 两种方式均失败时跳过，摘要写 `Preview: skipped (<原因>)`。

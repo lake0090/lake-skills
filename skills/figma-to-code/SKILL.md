@@ -6,7 +6,7 @@ compatibility:
 description: >-
   将 Figma 设计稿转换为生产级代码（Vue / React / HTML / CSS）。
   只要消息中出现 figma.com/design/ 或 figma.com/file/ 格式的链接，
-  ，都立即使用本 skil, 包括"帮我实现这个"、"照这个写组件"、"按这个设计做"、"把这个变成代码"
+  都立即使用本 skill，包括"帮我实现这个"、"照这个写组件"、"按这个设计做"、"把这个变成代码"
   等隐式表达，或任何附带 Figma 链接的组件/页面实现请求。
   未调用 get_figma_data 成功之前，禁止开始写任何界面代码。
 ---
@@ -32,7 +32,36 @@ Figma MCP: <错误类型>
 ```
 然后提示用户检查文件权限或 MCP 连接后重试。**不继续实现任何界面代码。**
 
-## Step 2：样式映射
+## Step 2：结构拆解（复杂页面必做）
+
+当节点结构复杂（多区域、多列、多嵌套）时，必须先输出结构拆解，再进入代码阶段。  
+**未完成结构拆解清单前，禁止开始写任何界面代码。**
+
+拆解顺序：
+1. 先定页面骨架：`top / sidebar / main`
+2. 再拆主内容：`left / right` 或 `content / aside`
+3. 最后拆区域内部模块：按视觉块划分（header、list、card、toolbar、footer）
+
+复杂页面一律先给出粗粒度 checklist（每个区域 1-3 个任务）：
+
+```markdown
+Structure Breakdown
+- [ ] Region: top
+  - [ ] 搭建容器与主轴方向（flex/grid）
+  - [ ] 放置核心子块（logo/nav/actions）
+- [ ] Region: sidebar
+  - [ ] 搭建容器与分区（header/menu/footer）
+  - [ ] 处理选中态与滚动区
+- [ ] Region: main
+  - [ ] 先确定 left-right 二栏或单栏结构
+  - [ ] 放置主内容块与次级信息块
+- [ ] Region: overlays（可选）
+  - [ ] 仅保留 tooltip/modal/badge 的 absolute 层
+```
+
+输出该清单后，再进入下一步。
+
+## Step 3：样式映射
 
 在写代码前，先侦测项目的样式体系（详细规则见 `references/style-mapping.md`）。
 
@@ -41,7 +70,7 @@ Figma MCP: <错误类型>
 - **找到匹配** → 用仓库已有的变量/class，保持设计系统一致性
 - **未找到匹配** → 在组件 scoped 样式里写字面量（hex / rem），不新增全局变量或 token 文件
 
-## Step 3：布局转换
+## Step 4：布局转换
 
 详细规则见 `references/layout-rules.md`。核心原则：
 
@@ -50,13 +79,13 @@ Figma MCP: <错误类型>
 `position: absolute` 只保留给真正的叠加层（tooltip、modal、badge 等）。
 无意义的 GROUP 节点直接扁平化，不在 DOM 里新增包裹层。
 
-## Step 4：交互与事件
+## Step 5：交互与事件
 
 默认只实现视觉样式，不写业务逻辑。
 需要事件处理的地方写 `// TODO: wire handler`，让调用方决定如何接入。
 如果用户明确说"帮我写交互逻辑"，再按需补充。
 
-## Step 5：输出摘要
+## Step 6：输出摘要
 
 代码输出后，**必须**附上以下摘要块：
 
@@ -70,7 +99,7 @@ Preview     : ok | skipped (<原因>)
 ─────────────────────────────
 ```
 
-## Step 6：预览（有 UI 改动时执行）
+## Step 7：预览（有 UI 改动时执行）
 
 **优先使用 Cursor Browser Tab（`cursor-ide-browser`）**，并按以下顺序执行：
 
@@ -84,4 +113,3 @@ Preview     : ok | skipped (<原因>)
 `cursor-ide-browser` 不可用时，降级调用 skill `devtool-css-debug`（`targetUrl` 必须明确，不得猜测）。
 
 两种方式均失败时，跳过预览，并在摘要写 `Preview: skipped (<原因>)`。
-`

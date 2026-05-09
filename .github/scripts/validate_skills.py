@@ -9,8 +9,8 @@ SKILLS_DIR = ROOT / "skills"
 
 ALLOWED_TOOLS = {
     "cursor-ide-browser",
-    "user-chrome-devtools",
-    "user-Framelink_Figma_MCP",
+    "chrome-devtools",
+    "Framelink_Figma_MCP",
 }
 
 

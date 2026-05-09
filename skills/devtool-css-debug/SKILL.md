@@ -2,7 +2,7 @@
 name: devtool-css-debug
 compatibility:
   tools:
-    - user-chrome-devtools
+    - chrome-devtools
     - ask-question
 description: Syncs DevTools CSS edits to local source files via injected page script. Triggers on write-back, CSS-to-source sync, style integration, DevTools edits, and CSS debugging.
 ---
@@ -16,7 +16,7 @@ description: Syncs DevTools CSS edits to local source files via injected page sc
 - **Never embed the script** — no paste, base64, `atob`, `JSON.stringify`, temp file, or node relay. Step 1 is a short snippet only.
 - **All URL/wait/norm logic lives in `scripts/css-tracker.js`.** Do not re-implement.
 - **Session resets** on navigate/refresh/Step 1 re-run — gate exception voids.
-- **All browser interactions use `user-chrome-devtools`**: `navigate_page`, `evaluate_script`. Never open a browser manually.
+- **All browser interactions use `chrome-devtools`**: `navigate_page`, `evaluate_script`. Never open a browser manually.
 
 ---
 
@@ -45,7 +45,7 @@ if [ ! -f "<sourceRoot>/css-tracker-dev.js" ]; then cp "<skill-path>/scripts/css
 if (!(Test-Path "<sourceRoot>/css-tracker-dev.js")) { Copy-Item "<skill-path>/scripts/css-tracker.js" "<sourceRoot>/css-tracker-dev.js" }
 ```
  
-Use `user-chrome-devtools.evaluate_script()` (`s.src` matches actual path):
+Use `chrome-devtools.evaluate_script()` (`s.src` matches actual path):
 ```javascript
 (async (T) => {
   if (!window.__cssTracker) {
@@ -79,7 +79,7 @@ Use `AskQuestion` when available; otherwise the same binary in plain text.
 
 ## Step 3 — Diff
 
-Via `user-chrome-devtools.evaluate_script()`:
+Via `chrome-devtools.evaluate_script()`:
 ```javascript
 JSON.stringify(window.__cssTracker.assertUrlMatchesTarget("PASTE_targetUrl"));
 JSON.stringify(window.__cssTracker.getDiff());

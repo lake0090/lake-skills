@@ -11,6 +11,46 @@ description: >-
 
 Real repo: **analyze first, run second** — read config, output the full `scan-code` command in the reply, *then* run `npx`. Skip the tool flow for pure generated snippets with no project on disk.
 
+## Best For
+
+- 前端项目中的 `<img>` 质量治理（CLS/LCP/WebP/srcset/alt）
+- AI 新生成页面后的图片问题快速审计与修复
+- 需要批量梳理图片性能规范并输出可复查报告的场景
+
+## Not For
+
+- 只有纯文本示例、没有本地项目文件的场景
+- 用户明确要求“仅讨论方案，不执行扫描命令”的终端受限场景
+- 非 `<img>` 体系（如纯 Canvas/WebGL 渲染）的图像优化问题
+
+## Required Inputs
+
+- 项目根目录（或可推断的 `package.json` 路径）
+- 扫描范围路径（建议传本次任务相关子目录）
+- 构建配置文件（Nuxt/Vite/Vue/tsconfig/jsconfig 等）
+- 用户对执行策略的约束（仅分析 / 允许执行终端）
+
+## Expected Output
+
+- 一条可执行且完整的 `lake-cimg scan-code` 命令
+- 基于扫描结果的问题摘要（不粘贴整段 JSON）
+- 修复策略与改动说明（含可跳过项和人工复查项）
+- 复扫结果（Track A 通过或仅剩 Track B 例外）
+
+## Failure Modes
+
+- `referencePoints = 0` 或 `items` 为空：不是通过，需先排查 scope/root/alias
+- 大量 `cannot_resolve`：优先纠正路径映射，不要直接改标记
+- 缺失构建配置导致 alias 推断不可靠：需明确“假设”并提示风险
+- 用户禁止执行命令：仅输出计划与命令草案，停止在分析阶段
+
+## Verification
+
+- 扫描前后结果对比可复查（同一路径、同一组 flags）
+- 关键问题闭环：尺寸、alt、LCP 策略、懒加载策略
+- Track A/Track B 分类清晰且可解释
+- 输出报告遵循 `reference.md` 的 reporting 结构
+
 ## Reply focus (to avoid off-topic output)
 
 - **This skill’s job** is: `lake-cimg` **plan** → **run** (if allowed) → reply in [Reporting](reference.md#reporting) form → **edit** `<img>`/Vue/JSX per steps below. That is the expected “shape” of the answer.

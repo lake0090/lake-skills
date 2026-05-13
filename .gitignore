@@ -1,0 +1,28 @@
+# Node dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+coverage/
+.next/
+.nuxt/
+.vite/
+
+# Environment files
+.env
+.env.*
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db

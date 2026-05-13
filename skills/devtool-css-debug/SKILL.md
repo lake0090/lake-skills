@@ -9,6 +9,46 @@ description: Syncs DevTools CSS edits to local source files via injected page sc
 
 # DevTools CSS Debug
 
+## Best For
+
+- 前端页面样式微调后，需要把 DevTools 改动回写源码
+- 需要保留一次调试会话中的样式变更 diff 证据
+- Vue/React 等项目中“样式已确认、待落盘”的场景
+
+## Not For
+
+- `targetUrl` 不明确或无法访问的场景
+- 无法使用 `chrome-devtools` MCP 的环境
+- 动态运行时样式（频繁 transform/transition）需长期绑定逻辑的场景
+
+## Required Inputs
+
+- `targetUrl`（必填，禁止猜测）
+- 项目路径（用于推断 `sourceRoot` 与 `srcDir`）
+- 可访问的 `chrome-devtools` MCP 工具
+- 用户对删改策略的确认（尤其是 `removed` 规则）
+
+## Expected Output
+
+- 可复查的 CSS diff（`modified/added/removed/inline/skipped`）
+- 明确的源码映射结果（已落盘文件与未解析项）
+- 写回后的验证结论（刷新后样式生效情况）
+- 一行总结（文件数量 + 分类计数 + 未解决原因）
+
+## Failure Modes
+
+- 未提供 `targetUrl`：必须先询问，禁止继续
+- 基线丢失（刷新/导航导致 session reset）：必须重走 Step 1
+- URL 与目标不一致：必须停止写回
+- 样式表跨域/无 source map：需标记 unresolved，不得强行猜测
+
+## Verification
+
+- `assertUrlMatchesTarget` 返回 `ok: true`
+- `getDiff()` 非空且结构合法
+- 写回后页面刷新，关键样式符合预期
+- 最终 summary 含 unresolved 与 skipped/runtime 计数
+
 ## Hard Rules
  
 - **No guessed URL.** If `targetUrl` missing, ask first.

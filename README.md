@@ -1,93 +1,91 @@
 # lake-skills
 
-团队共享的 Agent Skills 仓库。
+面向前端团队的 AI Agent Skills 工程化仓库。
 
-本仓库收录了可复用的 `SKILL.md` 技能，适用于 Cursor、Codex 等工具。
+`lake-skills` 的目标不是做“大而全提示词集合”，而是沉淀前端高频 AI 工作流，形成可安装、可验证、可演示、可持续维护的技能资产。
 
-## 技能列表
+## 这个仓库解决什么问题
 
-| 技能名 | 用途 |
-|---|---|
-| `figma-to-code` | 将 Figma 设计稿转换为可维护的前端代码。 |
-| `devtool-css-debug` | 将 DevTools 中的 CSS 调整同步回本地源码。 |
-| `image-optimizer` | 使用 `npx lake-cimg scan-code` 审查并修复 `<img>`（CLS、WebP、srcset、LCP）。 |
+- Figma 转代码容易靠截图猜测，结果难复现
+- AI 生成代码缺少工程边界与设计系统约束
+- 图片性能问题（CLS/LCP/WebP/srcset）缺乏系统化治理
+- DevTools 的样式修改难回写到源码
+- 中大型需求缺少可执行拆解与交接规范
 
-## 使用 `npx skills`
+## 核心 Skills
+
+| Skill | 典型场景 | 状态 |
+|---|---|---|
+| `figma-to-code` | 基于 Figma MCP 数据生成 Vue/React/HTML/CSS 代码 | Active |
+| `image-optimizer` | 审计并修复图片性能问题（CLS/LCP/WebP/srcset/alt） | Active |
+| `devtool-css-debug` | 将 DevTools CSS 调整同步回源码文件 | Experimental |
+| `frontend-code-review` | 前端变更评审（行为、状态、性能、可访问性、响应式） | Active |
+| `large-task-planner`（subagent） | 将中大型前端任务拆解成可执行子任务 | Active |
+
+## 快速开始
 
 ```bash
-# 查看可用技能
+# 查看技能列表
 npx skills add lake0090/lake-skills --list
 
 # 安装单个技能
 npx skills add lake0090/lake-skills --skill figma-to-code
 
 # 安装多个技能
-npx skills add lake0090/lake-skills --skill figma-to-code --skill devtool-css-debug --skill image-optimizer
-
-# 安装到指定 agent
-npx skills add lake0090/lake-skills -a cursor -a codex
+npx skills add lake0090/lake-skills --skill figma-to-code --skill image-optimizer
 
 # 安装全部技能
 npx skills add lake0090/lake-skills --all
-
-# 安装全部技能到指定 agent
-npx skills add lake0090/lake-skills --skill '*' -a cursor
-
-# 将某个技能安装到全部 agent
-npx skills add lake0090/lake-skills --agent '*' --skill figma-to-code
 ```
 
-更新已安装技能：
+## 本地开发与校验
 
-```bash
-npx skills update
+1. 修改 `skills/` 下的 `SKILL.md` 和相关 references。
+2. 运行校验脚本：
+   - `python .github/scripts/validate_skills.py`
+3. 验证本地可安装：
+   - `npx skills add . --list`
+4. 提交 PR 并完成至少一轮评审。
+
+## 示例工程
+
+- `examples/figma-to-code-vue`：Figma 转 Vue 的可复现实例
+
+## 文档导航
+
+- [Skill 设计指南](docs/skill-design-guide.md)
+- [前端 AI 工作流](docs/frontend-ai-workflow.md)
+
+## Blog
+
+- [Harness 不是提示词，而是驾驭 Agent 的工程机制](blog/harness-engineering.md)
+- [如何写好 AGENTS.md](blog/writing-agents-md.md)
+- [Spec 驱动的 Agent 工作流](blog/spec-driven-agent-workflow.md)
+
+## Roadmap
+
+- 将 `examples/figma-to-code-vue` 纳入 CI 构建验证
+- 为 `large-task-planner` 补充一个真实拆解案例
+- 为 `image-optimizer` 增加一个最小图片性能示例
+
+## 实验性说明
+
+`devtool-css-debug` 当前为 `Experimental`。在受控场景下可用，但不同构建链路下的样式映射策略仍在持续打磨。
+
+## 子代理：`large-task-planner`
+
+当需求跨模块、边界不清晰，或预计超过一个编码会话时，建议先调用 `large-task-planner` 产出可执行计划与交接提示，再进入实现阶段。
+
+快速安装（请根据系统选择命令复制执行）：
+
+**Mac/Linux：**
+```sh
+mkdir -p ~/.agents
+curl -o ~/.agents/large-task-planner.md https://raw.githubusercontent.com/lake0090/lake-skills/main/agents/large-task-planner.md
 ```
 
-## 开发说明
-
-1. 更新技能文档及其引用文件
-2. **本地仓库验证：** 在仓库根目录执行 `npx skills add . --list`（或 `npx skills add . --skill <name> -a cursor`），确认技能可用后再提交
-3. **远程 / 已发布验证：** 执行 `npx skills add lake0090/lake-skills --list` 或 `npx skills add lake0090/lake-skills --skill <name>`
-4. 提交 PR 并至少完成一次 Code Review
-
-## `large-task-planner` 子代理（长任务规划）
-
-当前端任务属于中大型、跨模块，或需求边界不清晰时，建议先用该子代理做规划，再进入编码。
-
-该子代理擅长：
-- 明确范围（Scope）与非目标（Non-goals）
-- 将任务拆成可执行子任务（Subtasks）
-- 生成可直接交给编码代理的交接提示（Handoff Prompts）
-
-### 调用方式
-
-使用 Subagent 工具时，建议至少包含：
-- `subagent_type: "large-task-planner"`
-- 简洁的 `description`（例如：`plan checkout refactor`）
-- 包含目标、约束、期望输出格式的 `prompt`
-
-示例（概念示例）：
-
-```json
-{
-  "description": "plan checkout refactor",
-  "subagent_type": "large-task-planner",
-  "prompt": "Plan a medium-sized checkout page refactor. Define scope, split into subtasks, and generate handoff prompts. Do not implement code."
-}
-```
-
-### 命令行直接下载 `large-task-planner.md`
-
-PowerShell（Windows）：
-
+**Windows（PowerShell）：**
 ```powershell
-New-Item -ItemType Directory -Force ".cursor/agents" | Out-Null
-Invoke-WebRequest "https://raw.githubusercontent.com/lake0090/lake-skills/main/.cursor/agents/large-task-planner.md" -OutFile ".cursor/agents/large-task-planner.md"
-```
-
-curl（macOS / Linux / Git Bash）：
-
-```bash
-mkdir -p .cursor/agents
-curl -L "https://raw.githubusercontent.com/lake0090/lake-skills/main/.cursor/agents/large-task-planner.md" -o ".cursor/agents/large-task-planner.md"
+mkdir $HOME\.agents -Force
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/lake0090/lake-skills/main/agents/large-task-planner.md" -OutFile "$HOME\.agents\large-task-planner.md"
 ```

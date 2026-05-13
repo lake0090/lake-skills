@@ -6,11 +6,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SKILLS_DIR = ROOT / "skills"
+README_PATH = ROOT / "README.md"
 
 ALLOWED_TOOLS = {
     "cursor-ide-browser",
     "chrome-devtools",
     "Framelink_Figma_MCP",
+    "ask-question",
 }
 
 
@@ -49,6 +51,35 @@ def extract_tools(frontmatter: str):
     return tools
 
 
+def extract_field(frontmatter: str, field: str):
+    pattern = rf"(?m)^{re.escape(field)}:\s*(.+?)\s*$"
+    match = re.search(pattern, frontmatter)
+    if not match:
+        return None
+    return match.group(1).strip()
+
+
+def validate_readme_skill_mentions(readme_text: str, skill_names, errors):
+    rows = re.findall(r"(?m)^\|\s*`([a-z0-9-]+)`\s*\|", readme_text)
+    for name in rows:
+        if name not in skill_names:
+            errors.append(f"README.md: Mentions unknown skill '{name}'")
+
+
+def validate_references_usage(skill_file: Path, text: str, errors):
+    references_dir = skill_file.parent / "references"
+    if not references_dir.exists():
+        return
+
+    rel_skill = skill_file.relative_to(ROOT).as_posix()
+    for ref_file in sorted(references_dir.glob("*.md")):
+        relative_ref = ref_file.relative_to(skill_file.parent).as_posix()
+        if relative_ref not in text:
+            errors.append(
+                f"{rel_skill}: Missing reference link to '{relative_ref}'"
+            )
+
+
 def main():
     errors = []
     skill_names = set()
@@ -72,18 +103,34 @@ def main():
             continue
         name = name_match.group(1)
         skill_names.add(name)
+        expected_name = skill_file.parent.name
+        if name != expected_name:
+            errors.append(
+                f"{rel}: Frontmatter name '{name}' does not match directory '{expected_name}'"
+            )
+
+        description = extract_field(frontmatter, "description")
+        if not description:
+            errors.append(f"{rel}: Missing 'description' in frontmatter")
 
         tools = extract_tools(frontmatter)
         for tool in tools:
-            if tool not in ALLOWED_TOOLS and tool != "ask-question":
+            if tool not in ALLOWED_TOOLS:
                 errors.append(
                     f"{rel}: Unknown compatibility tool '{tool}' "
-                    f"(allowed: {sorted(ALLOWED_TOOLS)} + ask-question)"
+                    f"(allowed: {sorted(ALLOWED_TOOLS)})"
                 )
 
-    md_files = [p for p in ROOT.rglob("*.md") if ".git" not in p.parts]
+        validate_references_usage(skill_file, text, errors)
+
+    md_files = []
+    for p in ROOT.rglob("*.md"):
+        if ".git" in p.parts:
+            continue
+        if "node_modules" in p.parts or "dist" in p.parts:
+            continue
+        md_files.append(p)
     md_link_re = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
-    skill_ref_re = re.compile(r"`([a-z0-9-]+)`")
 
     for md in md_files:
         rel_md = md.relative_to(ROOT).as_posix()
@@ -111,6 +158,12 @@ def main():
                 errors.append(
                     f"{rel_md}: References unknown skill '{ref_name}'"
                 )
+
+    if README_PATH.exists():
+        readme_text = read_text(README_PATH)
+        validate_readme_skill_mentions(readme_text, skill_names, errors)
+    else:
+        errors.append("README.md: File not found")
 
     if errors:
         print("Skill validation failed:")

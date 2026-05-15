@@ -61,6 +61,7 @@ npx skills add lake0090/lake-skills --all
 - [Harness 不是提示词，而是驾驭 Agent 的工程机制](blog/harness-engineering.md)
 - [如何写好 AGENTS.md](blog/writing-agents-md.md)
 - [Spec 驱动的 Agent 工作流](blog/spec-driven-agent-workflow.md)
+- [AI 技术项目执行规范（试行）](blog/ai-technical-project-execution-guidelines.md)
 
 ## Roadmap
 
